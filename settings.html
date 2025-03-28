@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PR Summary Generator Settings</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Settings</h1>
+    <div class="form-group">
+      <label for="githubToken">GitHub Access Token:</label>
+      <input type="password" id="githubToken" class="input" placeholder="Enter your GitHub token">
+    </div>
+    <div class="form-group">
+      <label for="openaiKey">OpenAI API Key:</label>
+      <input type="password" id="openaiKey" class="input" placeholder="Enter your OpenAI API key">
+    </div>
+    <div id="status" class="status"></div>
+    <button id="saveBtn" class="button">Save Settings</button>
+    <button id="backBtn" class="button secondary">Back to Main</button>
+  </div>
+  <script src="settings.js"></script>
+</body>
+</html> 
