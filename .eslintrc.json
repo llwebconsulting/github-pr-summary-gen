@@ -1,0 +1,50 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "webextensions": true,
+    "jest": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings"
+  ],
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "requireConfigFile": false
+  },
+  "plugins": [
+    "import",
+    "jest"
+  ],
+  "rules": {
+    "indent": ["error", 2],
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "always"],
+    "no-unused-vars": ["warn"],
+    "no-console": "off",
+    "no-useless-escape": "error",
+    "no-useless-catch": "error",
+    "import/no-unresolved": ["error", { "ignore": ["^chrome/"] }],
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "error",
+    "jest/no-identical-title": "error",
+    "jest/valid-expect": "error"
+  },
+  "globals": {
+    "chrome": "readonly"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.js"],
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ]
+} 

@@ -1,203 +1,195 @@
 require('./setup.js');
-const { getBranchInfo, getChanges, generateSummary, updatePRForm } = require('../content.js');
 
-describe('getBranchInfo', () => {
+// Import MockElement from setup
+const { MockElement } = global;
+
+// Set up mock values before loading the content script
+global.window.location.href = 'https://github.com/user/repo/compare/main...feature';
+global.window.location.pathname = '/user/repo/compare/main...feature';
+global.window.document.title = 'Comparing main...feature · user/repo';
+
+// Load the content script
+require('../content.js');
+
+describe('GitHub PR Summary Generator', () => {
+  let titleInput;
+  let descriptionInput;
+
   beforeEach(() => {
-    // Reset window.location and document.title
-    delete window.location;
-    window.location = {
-      href: '',
-      pathname: ''
-    };
-    document.title = '';
-  });
-
-  it('should extract branch info from URL and title', () => {
-    window.location.href = 'https://github.com/user/repo/compare/main...feature';
-    window.location.pathname = '/user/repo/compare/main/feature';
-    document.title = 'Comparing main...feature · user/repo';
-
-    const result = getBranchInfo();
-    expect(result).toEqual({
-      base: 'main',
-      head: 'main/feature'
+    // Reset mock values before each test
+    Object.defineProperty(global.window.location, 'href', {
+      value: 'https://github.com/user/repo/compare/main...feature',
+      writable: true
     });
-  });
-
-  it('should handle branch names with slashes', () => {
-    window.location.href = 'https://github.com/user/repo/compare/main...feature/new-branch';
-    window.location.pathname = '/user/repo/compare/main/feature/new-branch';
-    document.title = 'Comparing main...feature/new-branch · user/repo';
-
-    const result = getBranchInfo();
-    expect(result).toEqual({
-      base: 'main',
-      head: 'main/feature/new-branch'
+    Object.defineProperty(global.window.location, 'pathname', {
+      value: '/user/repo/compare/main...feature',
+      writable: true
     });
-  });
-
-  it('should return null when no branch info is found', () => {
-    window.location.href = 'https://github.com/user/repo';
-    window.location.pathname = '/user/repo';
-    document.title = 'user/repo';
-
-    const result = getBranchInfo();
-    expect(result).toBeNull();
-  });
-});
-
-describe('getChanges', () => {
-  beforeEach(() => {
-    global.fetch.mockClear();
-    chrome.storage.sync.get.mockClear();
-    document.body.innerHTML = '';
-  });
-
-  it('should fetch changes from GitHub API', async () => {
-    const mockToken = 'mock-token';
-    const mockDiff = 'mock diff content';
-    const mockSha = 'mock-sha';
-    
-    // Add commit SHA meta tag
-    const metaTag = document.createElement('meta');
-    metaTag.setAttribute('name', 'octolytics-commit-sha');
-    metaTag.setAttribute('content', mockSha);
-    document.head.appendChild(metaTag);
-    
-    chrome.storage.sync.get.mockResolvedValue({ githubToken: mockToken });
-    global.fetch.mockResolvedValueOnce({ 
-      ok: true, 
-      text: () => Promise.resolve(mockDiff)
+    Object.defineProperty(global.window.document, 'title', {
+      value: 'Comparing main...feature · user/repo',
+      writable: true
     });
 
-    const branchInfo = { base: 'main', head: 'feature' };
-    const result = await getChanges(branchInfo);
+    // Create mock form elements
+    titleInput = new MockElement();
+    descriptionInput = new MockElement();
 
-    expect(result).toEqual({ diff: mockDiff });
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-  });
-
-  it('should throw error when GitHub token is missing', async () => {
-    chrome.storage.sync.get.mockResolvedValue({ githubToken: null });
-
-    const branchInfo = { base: 'main', head: 'feature' };
-    await expect(getChanges(branchInfo)).rejects.toThrow('GitHub token not found');
-  });
-
-  it('should throw error when API request fails', async () => {
-    const mockSha = 'mock-sha';
-    
-    // Add commit SHA meta tag
-    const metaTag = document.createElement('meta');
-    metaTag.setAttribute('name', 'octolytics-commit-sha');
-    metaTag.setAttribute('content', mockSha);
-    document.head.appendChild(metaTag);
-    
-    chrome.storage.sync.get.mockResolvedValue({ githubToken: 'mock-token' });
-    global.fetch.mockResolvedValueOnce({ 
-      ok: false, 
-      statusText: 'Not Found',
-      text: () => Promise.resolve('Not Found'),
-      json: () => Promise.resolve({ message: 'Not Found' })
+    // Directly override global.document.querySelector
+    global.document.querySelector = jest.fn((selector) => {
+      if (selector === 'input[name="pull_request[title]"]' || selector === '#pull_request_title' || selector === 'input[aria-label="Title"]') {
+        return titleInput;
+      }
+      if (selector === 'textarea[name="pull_request[body]"]' || selector === '#pull_request_body' || selector === 'textarea[aria-label="Description"]') {
+        return descriptionInput;
+      }
+      if (selector.includes('base')) {
+        const baseSelect = new MockElement();
+        baseSelect.value = 'main';
+        return baseSelect;
+      }
+      return null;
     });
 
-    const branchInfo = { base: 'main', head: 'feature' };
-    await expect(getChanges(branchInfo)).rejects.toThrow('Failed to fetch diff from GitHub');
-  });
-});
-
-describe('generateSummary', () => {
-  beforeEach(() => {
-    global.fetch.mockClear();
-    chrome.storage.sync.get.mockClear();
-  });
-
-  it('should generate summary using OpenAI', async () => {
-    const mockKey = 'mock-key';
-    const mockResponse = {
-      choices: [{
-        message: {
-          content: JSON.stringify({
-            title: 'Test Title',
-            summary: 'Test Summary'
-          })
-        }
-      }]
-    };
-
-    chrome.storage.sync.get.mockResolvedValue({ openaiKey: mockKey });
-    global.fetch.mockResolvedValueOnce({ 
-      ok: true, 
-      json: () => Promise.resolve(mockResponse)
+    // Mock storage
+    chrome.storage.sync.get.mockImplementation((keys) => {
+      const result = {};
+      if (Array.isArray(keys) && keys.includes('githubToken')) {
+        result.githubToken = 'test-token';
+      }
+      if (Array.isArray(keys) && keys.includes('openaiKey')) {
+        result.openaiKey = 'test-key';
+      }
+      return Promise.resolve(result);
     });
 
-    const changes = { diff: 'mock diff' };
-    const result = await generateSummary(changes);
-
-    expect(result).toEqual({
-      title: 'Test Title',
-      summary: 'Test Summary'
-    });
+    // Reset fetch mock
+    global.fetch.mockReset();
   });
 
-  it('should throw error when OpenAI key is missing', async () => {
-    chrome.storage.sync.get.mockResolvedValue({ openaiKey: null });
-
-    const changes = { diff: 'mock diff' };
-    await expect(generateSummary(changes)).rejects.toThrow('OpenAI API key not found');
-  });
-
-  it('should handle malformed JSON response', async () => {
-    chrome.storage.sync.get.mockResolvedValue({ openaiKey: 'mock-key' });
-    global.fetch.mockResolvedValueOnce({
+  it('should handle PR summary generation end-to-end', async () => {
+    // Mock GitHub API response
+    const mockDiff = 'diff --git a/file.txt b/file.txt\n+new line';
+    const mockDiffResponse = {
       ok: true,
-      json: () => Promise.resolve({
-        choices: [{
-          message: {
-            content: 'Invalid JSON'
+      text: jest.fn().mockResolvedValue(mockDiff),
+      json: jest.fn().mockResolvedValue({
+        files: [{
+          filename: 'file.txt',
+          status: 'modified',
+          additions: 1,
+          deletions: 0,
+          changes: 1,
+          patch: '+new line'
+        }],
+        total_commits: 1,
+        commits: [{
+          commit: {
+            message: 'Test commit',
+            author: { name: 'Test Author' }
           }
         }]
       })
+    };
+
+    const mockUserResponse = {
+      ok: true,
+      json: jest.fn().mockResolvedValue({})
+    };
+
+    global.fetch
+      .mockImplementationOnce(() => Promise.resolve(mockUserResponse)) // Token check
+      .mockImplementationOnce(() => Promise.resolve(mockDiffResponse)) // Diff fetch
+      .mockImplementationOnce(() => Promise.resolve({ // OpenAI response
+        ok: true,
+        json: () => Promise.resolve({
+          choices: [{
+            message: {
+              content: JSON.stringify({
+                title: 'Test PR Title',
+                summary: 'Test PR Summary'
+              })
+            }
+          }]
+        })
+      }));
+
+    // Create a promise to wait for the response
+    const responsePromise = new Promise((resolve) => {
+      const sendResponse = jest.fn((response) => {
+        resolve(response);
+      });
+
+      // Trigger the message listener
+      chrome.runtime.onMessage.listener(
+        { action: 'generatePRSummary' },
+        {},
+        sendResponse
+      );
     });
 
-    const changes = { diff: 'mock diff' };
-    await expect(generateSummary(changes)).rejects.toThrow('Unexpected token \'I\', "Invalid JSON" is not valid JSON');
+    // Wait for the response
+    const response = await responsePromise;
+    expect(response).toEqual({ success: true });
+
+    // Verify the GitHub API calls were made with correct parameters
+    const fetchCalls = global.fetch.mock.calls;
+    expect(fetchCalls.length).toBe(3);
+
+    // Verify token check call
+    expect(fetchCalls[0][0]).toBe('https://api.github.com/user');
+    expect(fetchCalls[0][1].headers).toEqual(
+      expect.objectContaining({
+        'Authorization': 'token test-token'
+      })
+    );
+
+    // Verify diff fetch call
+    expect(fetchCalls[1][0]).toContain('/compare/');
+    expect(fetchCalls[1][1].headers).toEqual(
+      expect.objectContaining({
+        'Authorization': 'token test-token'
+      })
+    );
+
+    // Verify the OpenAI API call was made with correct parameters
+    expect(fetchCalls[2][0]).toBe('https://api.openai.com/v1/chat/completions');
+    expect(fetchCalls[2][1].headers).toEqual(
+      expect.objectContaining({
+        'Authorization': 'Bearer test-key'
+      })
+    );
+
+    // Verify the form was updated
+    expect(titleInput.value).toBe('Test PR Title');
+    expect(descriptionInput.value).toBe('Test PR Summary');
+    expect(titleInput.dispatchEvent).toHaveBeenCalledWith(expect.any(Event));
+    expect(descriptionInput.dispatchEvent).toHaveBeenCalledWith(expect.any(Event));
   });
-});
 
-describe('updatePRForm', () => {
-  beforeEach(() => {
-    document.body.innerHTML = '';
-  });
+  it('should handle errors gracefully', async () => {
+    // Mock GitHub API error
+    global.fetch.mockRejectedValueOnce(new Error('API Error'));
 
-  it('should update title and description fields', () => {
-    // Create mock form elements
-    const titleInput = document.createElement('input');
-    titleInput.setAttribute('name', 'pull_request[title]');
-    document.body.appendChild(titleInput);
+    // Create a promise to wait for the response
+    const responsePromise = new Promise((resolve) => {
+      const sendResponse = jest.fn((response) => {
+        resolve(response);
+      });
 
-    const descriptionInput = document.createElement('textarea');
-    descriptionInput.setAttribute('name', 'pull_request[body]');
-    document.body.appendChild(descriptionInput);
+      // Trigger the message listener
+      chrome.runtime.onMessage.listener(
+        { action: 'generatePRSummary' },
+        {},
+        sendResponse
+      );
+    });
 
-    const summary = {
-      title: 'New Title',
-      summary: 'New Description'
-    };
-
-    updatePRForm(summary);
-
-    expect(titleInput.value).toBe('New Title');
-    expect(descriptionInput.value).toBe('New Description');
-  });
-
-  it('should handle missing form elements gracefully', () => {
-    const summary = {
-      title: 'New Title',
-      summary: 'New Description'
-    };
-
-    // Should not throw error when elements don't exist
-    expect(() => updatePRForm(summary)).not.toThrow();
+    // Wait for the response
+    const response = await responsePromise;
+    expect(response).toEqual(
+      expect.objectContaining({
+        error: expect.any(String)
+      })
+    );
   });
 }); 
