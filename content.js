@@ -1,3 +1,9 @@
+// Export functions for testing
+exports.getBranchInfo = getBranchInfo;
+exports.getChanges = getChanges;
+exports.generateSummary = generateSummary;
+exports.updatePRForm = updatePRForm;
+
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   if (request.action === 'generatePRSummary') {
     try {
@@ -66,42 +72,23 @@ function getBranchInfo() {
   return null;
 }
 
-async function checkTokenPermissions(token) {
-  try {
-    const response = await fetch('https://api.github.com/user', {
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Failed to check token permissions: ${errorData.message || response.statusText}`);
-    }
-
-    return true;
-  } catch (error) {
-    throw error;
-  }
-}
-
 async function getChanges(branchInfo) {
   const settings = await chrome.storage.sync.get(['githubToken']);
   if (!settings.githubToken) {
     throw new Error('GitHub token not found. Please set it in settings.');
   }
 
-  await checkTokenPermissions(settings.githubToken);
-
   const repo = window.location.pathname.split('/')[1] + '/' + window.location.pathname.split('/')[2];
   
   try {
-    const encodedBase = encodeURIComponent(branchInfo.base);
-    const encodedHead = encodeURIComponent(branchInfo.head);
-    const apiUrl = `https://api.github.com/repos/${repo}/compare/${encodedBase}...${encodedHead}`;
+    // Get the commit SHA from the page source
+    const commitSha = document.querySelector('meta[name="octolytics-commit-sha"]')?.content;
+    if (!commitSha) {
+      throw new Error('Could not find commit SHA in page source');
+    }
 
-    const diffResponse = await fetch(apiUrl, {
+    // Get the diff for that commit
+    const diffResponse = await fetch(`https://api.github.com/repos/${repo}/commits/${commitSha}`, {
       headers: {
         'Authorization': `token ${settings.githubToken}`,
         'Accept': 'application/vnd.github.v3.diff'
@@ -136,12 +123,10 @@ The summary should be thorough and include:
 4. Testing notes if applicable
 5. Any breaking changes or dependencies that need attention
 
-Please format the response in JSON with two fields:
-- "title": A concise title string
-- "summary": A markdown-formatted string with the detailed summary
-
 Diff:
-${changes.diff}`;
+${changes.diff}
+
+Please provide the response in JSON format with "title" and "summary" fields. The summary should be well-structured and easy to read.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -161,23 +146,7 @@ ${changes.diff}`;
   }
 
   const data = await response.json();
-  
-  try {
-    const content = data.choices[0].message.content
-      .replace(/```json\n?/, '')
-      .replace(/```\n?$/, '')
-      .trim();
-    
-    const parsed = JSON.parse(content);
-    
-    if (typeof parsed.summary === 'object') {
-      parsed.summary = JSON.stringify(parsed.summary);
-    }
-    
-    return parsed;
-  } catch (error) {
-    throw new Error('Failed to parse the generated summary. Please try again.');
-  }
+  return JSON.parse(data.choices[0].message.content);
 }
 
 function updatePRForm(summary) {
