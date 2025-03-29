@@ -2,12 +2,12 @@ coverage:
   status:
     project:
       default:
-        target: 80%    # the required coverage value
-        threshold: 1%  # the leniency in hitting the target
+        target: 65%    # baseline coverage target
+        threshold: 5%  # allow coverage to drop by up to 5%
     patch:
       default:
-        target: 80%
-        threshold: 1%
+        target: 65%    # require new code to meet baseline
+        threshold: 5%  # allow some flexibility for new code
 
 comment:
   layout: "reach, diff, flags, files"

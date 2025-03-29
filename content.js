@@ -30,22 +30,25 @@ function getBranchInfo() {
     return null;
   }
   
-  const head = pathParts.slice(compareIndex + 1).join('/');
+  const branchParts = pathParts.slice(compareIndex + 1).join('/').split('...');
+  if (branchParts.length !== 2) {
+    return null;
+  }
+  
+  const [base, head] = branchParts;
   const title = document.title;
   
   // Try to get base branch from title first
   const titleMatch = title.match(/Comparing ([^.]+)\.\.\./);
   
   if (titleMatch) {
-    const base = titleMatch[1];
-    return { base, head };
+    return { base: titleMatch[1], head };
   }
 
   // If title is not available, try to get base branch from URL
   const urlMatch = url.match(/compare\/([^.]+)\.\.\./);
   if (urlMatch) {
-    const base = urlMatch[1];
-    return { base, head };
+    return { base: urlMatch[1], head };
   }
 
   // Try to get base branch from select element
@@ -65,8 +68,7 @@ function getBranchInfo() {
   }
   
   if (baseBranchSelect) {
-    const base = baseBranchSelect.value;
-    return { base, head };
+    return { base: baseBranchSelect.value, head };
   }
 
   // Try to get base branch from URL parameters

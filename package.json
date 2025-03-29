@@ -41,9 +41,13 @@
     "collectCoverageFrom": [
       "**/*.js",
       "!**/node_modules/**",
-      "!**/tests/**"
+      "!**/tests/**",
+      "!**/coverage/**",
+      "!**/dist/**"
     ],
     "transform": {},
+    "transformIgnorePatterns": [],
+    "coverageReporters": ["text", "lcov", "json"],
     "setupFilesAfterEnv": [
       "<rootDir>/tests/setup.js"
     ]
