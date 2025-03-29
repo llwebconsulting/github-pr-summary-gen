@@ -1,0 +1,71 @@
+# Dependabot configuration file
+version: 2
+updates:
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: "/"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    # Labels on pull requests for version updates
+    labels:
+      - "dependencies"
+      - "npm"
+      - "security"
+    # Specify who to assign the PR to (optional)
+    # assignees:
+    #   - "repo-owner"
+    # Add reviewers (optional)
+    # reviewers:
+    #   - "repo-owner"
+    # Configure commit message
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps(dev)"
+      include: "scope"
+    # Group all updates together
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+      production-dependencies:
+        dependency-type: "production"
+    # Raise pull requests for version updates
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      separator: "-"
+    # Limit the number of open PRs Dependabot can have at once
+    open-pull-requests-limit: 10
+    # Set version update strategy
+    versioning-strategy: auto
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # Look for `.github/workflows` files
+    directory: "/"
+    # Check for updates once a week
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    # Labels on pull requests for GitHub Actions
+    labels:
+      - "dependencies"
+      - "github-actions"
+    # Configure commit message
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    # Group all updates together
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    # Raise pull requests for version updates
+    pull-request-branch-name:
+      # Separate sections of the branch name with a hyphen
+      separator: "-" 

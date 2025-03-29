@@ -1,5 +1,10 @@
 # GitHub PR Summary Generator
 
+[![CI](https://github.com/llwebconsulting/github-pr-summary-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/llwebconsulting/github-pr-summary-gen/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/llwebconsulting/github-pr-summary-gen/branch/master/graph/badge.svg)](https://codecov.io/gh/llwebconsulting/github-pr-summary-gen)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 A Chrome extension that automatically generates pull request titles and summaries using OpenAI's GPT-3.5 model. This extension helps developers write better PR descriptions by analyzing the changes and generating comprehensive summaries.
 
 ## Features
@@ -65,40 +70,138 @@ To get an OpenAI API key:
 
 ## Contributing
 
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a new branch for your feature (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run the tests (if applicable)
-5. Commit your changes (`git commit -m 'Add some amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+We welcome contributions! Here's how you can help improve this project:
 
 ### Development Setup
 
-1. Clone the repository:
+1. Fork the repository by clicking the 'Fork' button on GitHub
+
+2. Clone your fork:
    ```bash
-   git clone https://github.com/yourusername/github-pr-summary.git
+   git clone https://github.com/your-username/github-pr-summary.git
    cd github-pr-summary
    ```
 
-2. Make your changes to the source code
+3. Add the original repository as a remote to keep your fork up to date:
+   ```bash
+   git remote add upstream https://github.com/original-owner/github-pr-summary.git
+   ```
 
-3. Test your changes:
-   - Load the extension in Chrome
-   - Test on a GitHub PR creation page
-   - Verify the summary generation works as expected
+4. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-4. Submit a pull request with a clear description of your changes
+5. Create a new branch for your changes (see Pull Request Process below)
 
-### Code Style
+### Continuous Integration
+
+This project uses GitHub Actions for CI/CD. The following checks run on all PRs:
+
+- **Linting**: Ensures code style consistency
+- **Testing**: Runs the test suite and reports coverage
+- **Security Scans**: 
+  - CodeQL analysis for code security
+  - npm audit for dependency vulnerabilities
+  - Snyk security scanning
+- **Dependency Review**: Checks for security issues in dependency changes
+- **Bundle Size**: Monitors changes in bundle size
+
+Required repository secrets for CI:
+- `CODECOV_TOKEN`: For uploading test coverage reports
+- `SNYK_TOKEN`: For running Snyk security scans
+
+All checks must pass before a PR can be merged.
+
+### Testing
+
+The project uses Jest for testing. To run the test suite:
+
+```bash
+# Run tests once
+npm test
+
+# Run tests in watch mode (useful during development)
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+### Code Quality
+
+We use ESLint to maintain code quality. To run the linter:
+
+```bash
+# Check for linting issues
+npm run lint
+
+# Fix automatically fixable issues
+npm run lint:fix
+```
+
+### Code Style Guidelines
 
 - Use consistent indentation (2 spaces)
 - Follow JavaScript best practices
 - Add comments for complex logic
 - Keep functions focused and single-purpose
 - Use meaningful variable and function names
+- All new code should have associated tests
+- Maintain or improve code coverage
+- Follow existing patterns in the codebase
+
+### Pull Request Process
+
+1. Ensure your fork is up to date:
+   ```bash
+   git fetch upstream
+   git checkout master
+   git merge upstream/master
+   ```
+
+2. Create a new branch for your feature:
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+
+3. Make your changes and ensure:
+   - All tests pass (`npm test`)
+   - Code follows style guidelines (`npm run lint`)
+   - New features have tests
+   - Documentation is updated if needed
+
+4. Commit your changes using clear commit messages:
+   ```bash
+   git commit -m 'Add: some amazing feature'
+   ```
+   
+   Prefix your commit messages with one of:
+   - `Add:` for new features
+   - `Fix:` for bug fixes
+   - `Update:` for non-breaking changes
+   - `Breaking:` for breaking changes
+   - `Docs:` for documentation changes
+   - `Test:` for test-related changes
+
+5. Push to your fork:
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+
+6. Open a Pull Request with:
+   - Clear title and description
+   - Reference any related issues
+   - List notable changes
+   - Mention any breaking changes
+   - Include screenshots for UI changes
+
+### Review Process
+
+1. Maintainers will review your PR
+2. Address any requested changes
+3. Once approved, your PR will be merged
+4. Your contribution will be added to the changelog
 
 ## License
 

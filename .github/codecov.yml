@@ -1,0 +1,15 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 65%    # baseline coverage target
+        threshold: 5%  # allow coverage to drop by up to 5%
+    patch:
+      default:
+        target: 65%    # require new code to meet baseline
+        threshold: 5%  # allow some flexibility for new code
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false 
