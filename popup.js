@@ -1,7 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   
-  if (!tab.url.includes('github.com')) {
+  const url = new URL(tab.url);
+  const allowedHosts = ['github.com', 'www.github.com'];
+  if (!allowedHosts.includes(url.host)) {
     document.getElementById('error').textContent = 'This extension only works on GitHub.';
     document.getElementById('error').style.display = 'block';
     document.getElementById('generate').disabled = true;
