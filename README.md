@@ -1,5 +1,10 @@
 # GitHub PR Summary Generator
 
+[![CI](https://github.com/llwebconsulting/github-pr-summary-gen/actions/workflows/ci.yml/badge.svg)](https://github.com/llwebconsulting/github-pr-summary-gen/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/llwebconsulting/github-pr-summary-gen/branch/master/graph/badge.svg)](https://codecov.io/gh/llwebconsulting/github-pr-summary-gen)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 A Chrome extension that automatically generates pull request titles and summaries using OpenAI's GPT-3.5 model. This extension helps developers write better PR descriptions by analyzing the changes and generating comprehensive summaries.
 
 ## Features
@@ -89,6 +94,25 @@ We welcome contributions! Here's how you can help improve this project:
 
 5. Create a new branch for your changes (see Pull Request Process below)
 
+### Continuous Integration
+
+This project uses GitHub Actions for CI/CD. The following checks run on all PRs:
+
+- **Linting**: Ensures code style consistency
+- **Testing**: Runs the test suite and reports coverage
+- **Security Scans**: 
+  - CodeQL analysis for code security
+  - npm audit for dependency vulnerabilities
+  - Snyk security scanning
+- **Dependency Review**: Checks for security issues in dependency changes
+- **Bundle Size**: Monitors changes in bundle size
+
+Required repository secrets for CI:
+- `CODECOV_TOKEN`: For uploading test coverage reports
+- `SNYK_TOKEN`: For running Snyk security scans
+
+All checks must pass before a PR can be merged.
+
 ### Testing
 
 The project uses Jest for testing. To run the test suite:
@@ -132,8 +156,8 @@ npm run lint:fix
 1. Ensure your fork is up to date:
    ```bash
    git fetch upstream
-   git checkout main
-   git merge upstream/main
+   git checkout master
+   git merge upstream/master
    ```
 
 2. Create a new branch for your feature:
