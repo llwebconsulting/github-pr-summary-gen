@@ -2,31 +2,31 @@
   "manifest_version": 3,
   "name": "GitHub PR Summary Generator",
   "version": "1.0",
-  "description": "Automatically generates PR titles and summaries using OpenAI",
-  "permissions": [
-    "storage",
-    "activeTab",
-    "scripting"
-  ],
-  "host_permissions": [
-    "https://github.com/*"
-  ],
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "128": "icons/icon.svg"
-    }
-  },
+  "description": "Generate summaries for GitHub pull requests.",
+  "permissions": ["storage", "activeTab"],
   "background": {
     "service_worker": "background.js"
   },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon.svg",
+      "48": "icons/icon.svg",
+      "128": "icons/icon.svg"
+    }
+  },
+  "icons": {
+    "16": "icons/icon.svg",
+    "48": "icons/icon.svg",
+    "128": "icons/icon.svg"
+  },
+  "options_page": "settings.html",
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "type": "module"
     }
-  ],
-  "icons": {
-    "128": "icons/icon.svg"
-  }
-} 
+  ]
+}

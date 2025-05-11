@@ -1,3 +1,4 @@
+# Temporary files
 tmp/
 node_modules/
 .eslintcache

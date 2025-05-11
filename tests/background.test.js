@@ -102,4 +102,4 @@ describe('Background Script', () => {
       expect(mockChrome.windows.create).toHaveBeenCalled();
     });
   });
-}); 
+});

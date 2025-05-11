@@ -17,7 +17,6 @@ describe('Settings', () => {
     // Reset the DOM
     document.body.innerHTML = `
       <input type="text" id="githubToken" />
-      <input type="text" id="openaiKey" />
       <button id="saveBtn">Save</button>
       <button id="backBtn">Back</button>
       <div id="status"></div>
@@ -38,8 +37,7 @@ describe('Settings', () => {
     it('loads saved settings', async () => {
       // Setup
       const savedSettings = {
-        githubToken: 'test-token',
-        openaiKey: 'test-key'
+        githubToken: 'test-token'
       };
       chrome.storage.sync.get.mockResolvedValueOnce(savedSettings);
 
@@ -50,7 +48,6 @@ describe('Settings', () => {
 
       // Assert
       expect(document.getElementById('githubToken').value).toBe(savedSettings.githubToken);
-      expect(document.getElementById('openaiKey').value).toBe(savedSettings.openaiKey);
     });
 
     it('handles missing settings', async () => {
@@ -64,7 +61,6 @@ describe('Settings', () => {
 
       // Assert
       expect(document.getElementById('githubToken').value).toBe('');
-      expect(document.getElementById('openaiKey').value).toBe('');
     });
   });
 
@@ -79,9 +75,7 @@ describe('Settings', () => {
     it('saves settings when clicked', async () => {
       // Setup
       const testToken = 'new-test-token';
-      const testKey = 'new-test-key';
       document.getElementById('githubToken').value = testToken;
-      document.getElementById('openaiKey').value = testKey;
 
       // Act
       document.getElementById('saveBtn').click();
@@ -89,8 +83,7 @@ describe('Settings', () => {
 
       // Assert
       expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-        githubToken: testToken,
-        openaiKey: testKey
+        githubToken: testToken
       });
 
       const statusDiv = document.getElementById('status');
@@ -102,7 +95,6 @@ describe('Settings', () => {
     it('handles validation error', async () => {
       // Setup
       document.getElementById('githubToken').value = '';
-      document.getElementById('openaiKey').value = '';
 
       // Act
       document.getElementById('saveBtn').click();
@@ -119,9 +111,7 @@ describe('Settings', () => {
     it('handles save error', async () => {
       // Setup
       const testToken = 'new-test-token';
-      const testKey = 'new-test-key';
       document.getElementById('githubToken').value = testToken;
-      document.getElementById('openaiKey').value = testKey;
       chrome.storage.sync.set.mockRejectedValueOnce(new Error('Save failed'));
 
       // Act
@@ -150,4 +140,4 @@ describe('Settings', () => {
       expect(window.close).toHaveBeenCalled();
     });
   });
-}); 
+});

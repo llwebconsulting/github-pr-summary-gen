@@ -1,9 +1,12 @@
-// Listen for installation
+// Moved from `dist/background.js` to the root directory.
+
 chrome.runtime.onInstalled.addListener(() => {
-  // Initialize any necessary storage or state
-  chrome.storage.sync.get(['githubToken', 'openaiKey'], (result) => {
-    if (!result.githubToken || !result.openaiKey) {
-      // Open settings page on first install
+  console.log('GitHub PR Summary extension installed.');
+
+  chrome.storage.sync.get(['githubToken', 'openaiKey'], (settings) => {
+    const { githubToken, openaiKey } = settings;
+
+    if (!githubToken || !openaiKey) {
       chrome.windows.create({
         url: 'settings.html',
         type: 'popup',
@@ -12,4 +15,4 @@ chrome.runtime.onInstalled.addListener(() => {
       });
     }
   });
-}); 
+});

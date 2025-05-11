@@ -172,4 +172,4 @@ describe('Popup', () => {
       expect(mockChrome.runtime.openOptionsPage).toHaveBeenCalled();
     });
   });
-}); 
+});

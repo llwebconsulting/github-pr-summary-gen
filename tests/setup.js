@@ -1,3 +1,13 @@
+const { TextEncoder, TextDecoder } = require('util');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+global.fetch = fetch;
+global.Response = fetch.Response;
+global.Request = fetch.Request;
+global.Headers = fetch.Headers;
+
 // Mock Element class
 class MockElement {
   constructor() {
@@ -53,7 +63,7 @@ const mockDocument = {
     }
     return element;
   }),
-  createElement: jest.fn((tag) => new MockElement()),
+  createElement: jest.fn(() => new MockElement()),
   body: {
     appendChild: jest.fn(),
     innerHTML: ''
@@ -105,6 +115,8 @@ Object.defineProperty(window, 'close', {
   writable: true
 });
 
+console.log('setup.js executed: chrome mock applied');
+
 // Reset all mocks before each test
 beforeEach(() => {
   jest.clearAllMocks();
@@ -112,4 +124,4 @@ beforeEach(() => {
   window.location._pathname = '/user/repo/compare/main...feature';
   document.title = 'Comparing main...feature · user/repo';
   document.body.innerHTML = '';
-}); 
+});
