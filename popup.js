@@ -2,7 +2,7 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   const generateButton = document.getElementById('generate');
-  const settingsButton = document.getElementById('settings');
+  const settingsButton = document.getElementById('settingsBtn');
   const errorElement = document.getElementById('error');
 
   try {
