@@ -14,8 +14,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           throw new Error('Could not determine branch information');
         }
 
-        const changes = processFiles(branchInfo.files);
-        const summary = await fetchCopilotSummary(branchInfo.token, changes);
+        const changes = await processFiles(branchInfo);
+        const summary = await fetchCopilotSummary(changes);
         updatePRForm(summary);
         sendResponse({ success: true });
       } catch (error) {
