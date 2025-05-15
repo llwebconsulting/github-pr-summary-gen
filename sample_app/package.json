@@ -13,8 +13,5 @@
   "description": "",
   "dependencies": {
     "express": "^5.1.0"
-  },
-  "devDependencies": {
-    "cypress": "^14.3.3"
   }
 }
